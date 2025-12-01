@@ -1,23 +1,77 @@
 :root{
-    --textcolor: wheat;
+    --bg: #0b1a3d;
+    --accent: #ffcc66;
+    --light: #ffffff;
+    --card: rgba(255,255,255,0.08);
+    --radius: 14px;
 }
+
 body{
     font-family: Arial, Helvetica, sans-serif;
     font-size: 20px;
-    background-color: darkblue;
+    background:var(--bg);
     margin: 25px 50px;
     max-width: 100%;
-    color: var(--textcolor);
+    color: var(--light);
     line-height: 1.4;
+}
+header{
+    background: rgba(0,0,0,0.3);
+    padding: 20px;
+    position: sticky;
+    top:0;
+    z-index:99;
+    border-radius: var(--radius);
 }
 h1{
     text-align: center;
+    margin-top: 40px;
+    color: var(--accent);
+    font-size: 40px;
 }
-a {
-    color: var(--textcolor);
+nav {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+@media (max-width: 600px){
+    a{
+        flex: 100%;
+    }
+}
+nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 20px;
+    font-weight:600;
+    transition:0.3s;
+}
+nav a:hover{
+    color: var(--light);
+}
+.card{
+    background:var(--card);
+    padding:25px;
+    border-radius:var(--radius);
+    margin-bottom:30px;
+}
+ul.social{
+    display:flex;
+    gap:25px;
+    padding:0;
+    margin-top:20px;
+}
+ul.social li{
+    list-style:none;
+}
+
+ul.social a{
+    color:var(--accent);
+    font-weight:600;
 }
 .btn-primary {
-    background-color: black;  
+background-color: var(--accent);  
   color: var(--textcolor);
   font-weight: 600;
   border: none;
@@ -27,3 +81,43 @@ a {
 .btn-primary:hover{
 background-color: #0056b3;
 }
+form{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    background:var(--card);
+    padding:25px;
+    border-radius:var(--radius);
+}
+
+input{
+    padding:12px;
+    border-radius:var(--radius);
+    border:none;
+    font-size:18px;
+}
+footer{
+    text-align:center;
+    padding:30px;
+    margin-top:40px;
+    background:rgba(0,0,0,0.3);
+}
+.tooltip{
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+.tooltiptext{
+    visibility:hidden;
+    width: 210px;
+    background-color: var(--bg);
+    color:VAR(--light);
+    text-align: center;
+    border-radius: 6px;
+    padding:5px 0;
+    position: absolute;
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
