@@ -410,8 +410,20 @@ retryLevelBtn.addEventListener('click', retryLevel);
 
 // Initial Check
 if (!db.isConfigured()) {
-    console.warn("DB not configured. Waiting for env injection or script load.");
-    // We could show a generic error here if needed, but usually server injects it.
+    console.warn("DB not configured.");
+
+    // Add visual warning
+    const warning = document.createElement('div');
+    warning.style.position = 'fixed';
+    warning.style.bottom = '10px';
+    warning.style.right = '10px';
+    warning.style.background = 'rgba(255, 0, 0, 0.8)';
+    warning.style.color = 'white';
+    warning.style.padding = '10px';
+    warning.style.borderRadius = '5px';
+    warning.style.zIndex = '9999';
+    warning.textContent = '⚠️ Database Not Connected (Check Keys)';
+    document.body.appendChild(warning);
 }
 updateAuthUI();
 

@@ -50,7 +50,9 @@ class CloudDatabase {
     // --- Users ---
 
     async findUser(username) {
-        if (!this.dbReady) return null;
+        if (!this.dbReady) {
+            throw 'Database not connected';
+        }
 
         const { data, error } = await supabaseClient
             .from('profiles')
@@ -66,7 +68,7 @@ class CloudDatabase {
     }
 
     async saveUser(user) {
-        if (!this.dbReady) return;
+        if (!this.dbReady) throw new Error('Database not connected. Check your internet or Game Settings.');
 
         const { error } = await supabaseClient
             .from('profiles')
@@ -83,7 +85,9 @@ class CloudDatabase {
     // --- Scores ---
 
     async saveScore(score) {
-        if (!this.dbReady) return;
+        if (!this.dbReady) {
+            throw 'Database not connected';
+        }
 
         const points = this.calculatePoints(score.level, score.moves, score.timeSeconds);
 
