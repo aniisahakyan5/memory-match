@@ -4,8 +4,9 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Serve static files (css, js, images) directly
-app.use(express.static(__dirname));
+// Serve static files (css, js, images), but DO NOT serve index.html automatically
+// This forces the root request to fall through to our custom handler
+app.use(express.static(__dirname, { index: false }));
 
 // Intercept root request to inject config
 app.get('/', (req, res) => {
