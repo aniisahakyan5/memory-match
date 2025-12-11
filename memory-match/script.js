@@ -403,38 +403,17 @@ function updateLeaderboardUI() {
     });
 }
 
-// Config Elements
-const configModal = document.getElementById('config-modal');
-const supabaseUrlInput = document.getElementById('supabase-url-input');
-const supabaseKeyInput = document.getElementById('supabase-key-input');
-const saveConfigBtn = document.getElementById('save-config-btn');
-const configError = document.getElementById('config-error');
-
 // Event Listeners
 restartBtn.addEventListener('click', () => initGame(true));
 nextLevelBtn.addEventListener('click', nextLevel);
 retryLevelBtn.addEventListener('click', retryLevel);
 
-saveConfigBtn.addEventListener('click', () => {
-    const url = supabaseUrlInput.value.trim();
-    const key = supabaseKeyInput.value.trim();
-
-    if (!url || !key) {
-        configError.textContent = "Both URL and Key are required.";
-        return;
-    }
-
-    db.saveConfig(url, key);
-});
-
 // Initial Check
 if (!db.isConfigured()) {
-    configModal.classList.add('visible');
-    // Hide auth modal if config is needed first
-    authModal.classList.remove('visible');
-} else {
-    updateAuthUI();
+    console.warn("DB not configured. Waiting for env injection or script load.");
+    // We could show a generic error here if needed, but usually server injects it.
 }
+updateAuthUI();
 
 async function updateLeaderboardUI() {
     // Get Consolidated Scores (One per user, best performance)

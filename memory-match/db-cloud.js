@@ -4,16 +4,20 @@
  */
 
 // Placeholder Constants
-const DEFAULT_URL = 'YOUR_SUPABASE_URL_HERE';
-const DEFAULT_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+// Now we expect window.GAME_CONFIG to be present from server.js
+const DEFAULT_URL = '';
+const DEFAULT_KEY = '';
 
 let supabaseClient = null;
 
 class CloudDatabase {
     constructor() {
+        // Read injected config or fall back to defaults
+        const config = window.GAME_CONFIG || {};
+
         this.params = {
-            url: localStorage.getItem('sb_url') || DEFAULT_URL,
-            key: localStorage.getItem('sb_key') || DEFAULT_KEY
+            url: config.SUPABASE_URL || DEFAULT_URL,
+            key: config.SUPABASE_KEY || DEFAULT_KEY
         };
 
         this.dbReady = false;
@@ -21,7 +25,7 @@ class CloudDatabase {
     }
 
     tryInit() {
-        if (this.params.url && this.params.url !== DEFAULT_URL && this.params.key && this.params.key !== DEFAULT_KEY) {
+        if (this.params.url && this.params.key) {
             if (typeof supabase !== 'undefined') {
                 try {
                     supabaseClient = supabase.createClient(this.params.url, this.params.key);
@@ -31,6 +35,8 @@ class CloudDatabase {
                     console.error('Supabase Init Failed:', e);
                 }
             }
+        } else {
+            console.warn('Supabase Credentials missing. Check Server Environment Variables.');
         }
     }
 
@@ -38,14 +44,8 @@ class CloudDatabase {
         return this.dbReady;
     }
 
-    saveConfig(url, key) {
-        localStorage.setItem('sb_url', url);
-        localStorage.setItem('sb_key', key);
-        this.params.url = url;
-        this.params.key = key;
-        this.tryInit();
-        location.reload();
-    }
+    // Config saving is no longer needed on client
+    // saveConfig(url, key) { ... } REMOVED
 
     // --- Users ---
 
