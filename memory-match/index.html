@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Match</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <div class="user-profile hidden" id="user-profile-bar">
+                <span>👤 <span id="username-display">Guest</span></span>
+                <button id="logout-btn" class="btn small">Logout</button>
+            </div>
+            <h1>Memory Match</h1>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="label">Level</span>
+                    <span id="level" class="value">1</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Moves</span>
+                    <span id="moves" class="value">0</span>
+                    <span class="sub-label">/ <span id="max-moves">--</span></span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Time</span>
+                    <span id="time" class="value">00:00</span>
+                </div>
+                <button id="restart-btn" class="btn">Restart</button>
+            </div>
+        </header>
+
+        <main>
+            <div id="game-board" class="game-board blur-locked">
+                <!-- Cards injected via JS -->
+                <div class="lock-overlay">
+                    <p>Please Login to Play</p>
+                </div>
+            </div>
+
+            <div class="leaderboard-container">
+                <h2>🏆 Global Rankings</h2>
+                <div class="leaderboard-controls">
+                    <button class="filter-btn active" data-filter="daily">Today</button>
+                    <button class="filter-btn" data-filter="all">All Time</button>
+                </div>
+                <div class="leaderboard-header">
+                    <span>PLAYER</span>
+                    <span>LEVEL</span>
+                    <span>SCORE</span>
+                </div>
+                <ul id="leaderboard-list">
+                    <!-- Scores injected via JS -->
+                    <li class="empty-state">No games played yet!</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="auth-modal" class="modal visible">
+        <div class="modal-content auth-content">
+            <h2 id="auth-title">Welcome Back</h2>
+            <div class="input-group">
+                <input type="text" id="username-input" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <input type="password" id="password-input" placeholder="Password">
+            </div>
+            <p id="auth-error" class="error-msg"></p>
+            <button id="auth-action-btn" class="btn primary full-width">Login</button>
+            <p class="auth-switch">
+                <span id="auth-switch-text">New here?</span>
+                <a href="#" id="auth-switch-link">Create Account</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>💀 Game Over 💀</h2>
+            <p>You ran out of moves!</p>
+            <button id="retry-level-btn" class="btn">Try Again</button>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div id="win-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>🎉 Perfect! 🎉</h2>
+            <p>Level <span id="final-level"></span> Complete</p>
+            <p>Time: <span id="final-time"></span></p>
+            <p>Moves: <span id="final-moves"></span> / <span id="final-max-moves"></span></p>
+            <button id="next-level-btn" class="btn primary">Next Level</button>
+        </div>
+    </div>
+
+    <script src="db.js"></script>
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
