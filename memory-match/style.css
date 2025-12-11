@@ -491,3 +491,8 @@ h1 {
     grid-template-columns: 2fr 1fr 1fr;
     /* ... */
 }
+
+/* Config Modal */
+#config-modal .input-group input {
+    margin-bottom: 10px;
+}

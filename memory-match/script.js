@@ -308,33 +308,36 @@ function startTimer() {
     }, 1000);
 }
 
-function handleWin() {
+async function handleWin() {
+    // Stop Timer
     clearInterval(timer);
+
     const timeStr = timeElement.textContent;
+    const timeSeconds = seconds;
 
-    // Save Score to DB
-    const currentUser = auth.getCurrentUser();
-    db.saveScore({
-        userId: currentUser.id,
-        username: currentUser.username,
-        level: currentLevel,
-        moves: moves,
-        timeStr: timeStr,
-        timeSeconds: seconds,
-        date: new Date().toLocaleDateString()
-    });
+    // Save Score
+    if (auth.isLoggedIn()) {
+        const user = auth.getCurrentUser();
+        await db.saveScore({
+            username: user.username, // We store username to avoid joins for now
+            level: currentLevel,
+            moves: moves,
+            timeStr: timeStr,
+            timeSeconds: timeSeconds,
+            date: new Date().toLocaleDateString()
+        });
 
-    updateLeaderboardUI();
+        // Update Leaderboard immediately
+        updateLeaderboardUI();
+    }
 
-    // Update Modal
-    finalLevelElement.textContent = currentLevel;
+    // Show Modal
     finalTimeElement.textContent = timeStr;
     finalMovesElement.textContent = moves;
     finalMaxMovesElement.textContent = maxMoves;
+    finalLevelElement.textContent = currentLevel;
 
-    setTimeout(() => {
-        winModal.classList.add('visible');
-    }, 500);
+    winModal.classList.add('visible');
 }
 
 function handleGameOver() {
@@ -400,10 +403,70 @@ function updateLeaderboardUI() {
     });
 }
 
+// Config Elements
+const configModal = document.getElementById('config-modal');
+const supabaseUrlInput = document.getElementById('supabase-url-input');
+const supabaseKeyInput = document.getElementById('supabase-key-input');
+const saveConfigBtn = document.getElementById('save-config-btn');
+const configError = document.getElementById('config-error');
+
 // Event Listeners
 restartBtn.addEventListener('click', () => initGame(true));
 nextLevelBtn.addEventListener('click', nextLevel);
 retryLevelBtn.addEventListener('click', retryLevel);
 
+saveConfigBtn.addEventListener('click', () => {
+    const url = supabaseUrlInput.value.trim();
+    const key = supabaseKeyInput.value.trim();
+
+    if (!url || !key) {
+        configError.textContent = "Both URL and Key are required.";
+        return;
+    }
+
+    db.saveConfig(url, key);
+});
+
 // Initial Check
-updateAuthUI();
+if (!db.isConfigured()) {
+    configModal.classList.add('visible');
+    // Hide auth modal if config is needed first
+    authModal.classList.remove('visible');
+} else {
+    updateAuthUI();
+}
+
+async function updateLeaderboardUI() {
+    // Get Consolidated Scores (One per user, best performance)
+    // Now async compatible
+    const rankings = await db.getGlobalRankings(currentFilter);
+
+    leaderboardList.innerHTML = '';
+
+    if (!rankings || rankings.length === 0) {
+        leaderboardList.innerHTML = '<li class="empty-state">No scores yet (' + (currentFilter === 'daily' ? 'Today' : 'All Time') + ')</li>';
+        return;
+    }
+
+    // Top 10 Global
+    rankings.slice(0, 10).forEach((score, index) => {
+        const li = document.createElement('li');
+
+        // Add Rank Classes
+        if (index === 0) li.classList.add('rank-1');
+        if (index === 1) li.classList.add('rank-2');
+        if (index === 2) li.classList.add('rank-3');
+
+        li.innerHTML = `
+            <span>#${index + 1} ${score.username}</span>
+            <span>Lvl ${score.maxLevel}</span>
+            <span>${score.totalScore} pts</span>
+        `;
+        leaderboardList.appendChild(li);
+
+        // Highlight current user
+        if (auth.getCurrentUser() && score.username === auth.getCurrentUser().username) {
+            li.classList.add('current-user');
+        }
+    });
+}
