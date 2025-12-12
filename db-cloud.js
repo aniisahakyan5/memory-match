@@ -166,6 +166,31 @@ class CloudDatabase {
 
         return globalRankings.sort((a, b) => b.totalScore - a.totalScore);
     }
+
+    async getUserMaxLevel(username) {
+        if (!this.dbReady) return 0;
+
+        // Query all scores for this user to find the max level
+        // We could use .max() modifier if Supabase supported it easily in client lib, 
+        // but ordering by level desc and taking 1 is synonymous.
+        const { data, error } = await supabaseClient
+            .from('scores')
+            .select('level')
+            .eq('username', username)
+            .order('level', { ascending: false })
+            .limit(1);
+
+        if (error) {
+            console.error('Error fetching max level:', error);
+            return 0;
+        }
+
+        if (data && data.length > 0) {
+            return data[0].level;
+        }
+
+        return 0;
+    }
 }
 
 const db = new CloudDatabase();
