@@ -1,0 +1,498 @@
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #8b5cf6;
+    --accent-color: #ec4899;
+    --background-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    --text-color: #f3f4f6;
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+    --font-main: 'Outfit', sans-serif;
+    --error-color: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-main);
+    background: var(--background-gradient);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+.app-container {
+    max-width: 800px;
+    width: 95%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* User Profile */
+.user-profile {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: var(--glass-border);
+}
+
+.user-profile.hidden {
+    display: none;
+}
+
+.btn.small {
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn.small:hover {
+    background: var(--accent-color);
+}
+
+/* Header */
+header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    background: linear-gradient(to right, #c084fc, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stats-bar {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 25px;
+    border-radius: 50px;
+    border: var(--glass-border);
+    backdrop-filter: blur(10px);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+}
+
+.label {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+}
+
+.value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.sub-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    font-family: var(--font-main);
+}
+
+.btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+/* Game Board */
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    perspective: 1000px;
+    position: relative;
+    transition: filter 0.3s;
+}
+
+.game-board.blur-locked {
+    filter: blur(8px);
+    pointer-events: none;
+}
+
+.lock-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 10px black;
+    z-index: 10;
+    opacity: 0;
+}
+
+.game-board.blur-locked .lock-overlay {
+    opacity: 1;
+}
+
+.card {
+    aspect-ratio: 1;
+    position: relative;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.card.flipped {
+    transform: rotateY(180deg);
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    border: var(--glass-border);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-front {
+    background: var(--card-bg);
+    backdrop-filter: blur(5px);
+}
+
+.card-front::after {
+    content: '?';
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.2);
+    font-weight: 700;
+}
+
+.card-back {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    backdrop-filter: blur(10px);
+    transform: rotateY(180deg);
+}
+
+/* Leaderboard */
+.leaderboard-container {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 20px;
+    border: var(--glass-border);
+    text-align: center;
+}
+
+.leaderboard-container h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #e0e7ff;
+}
+
+.leaderboard-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 15px;
+    color: #9ca3af;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#leaderboard-list {
+    list-style: none;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+#leaderboard-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 15px;
+    margin-bottom: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+
+#leaderboard-list li.empty-state {
+    justify-content: center;
+    color: #6b7280;
+    font-style: italic;
+    background: transparent;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.modal.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #2e1065, #1e1b4b);
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    min-width: 320px;
+    max-width: 90%;
+}
+
+.modal.visible .modal-content {
+    transform: scale(1);
+}
+
+.modal-content h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    background: linear-gradient(to right, #f472b6, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.modal-content p {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #e0e7ff;
+}
+
+.modal-content .btn.primary {
+    margin-top: 20px;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    background: linear-gradient(90deg, #ec4899, #8b5cf6);
+}
+
+/* Auth Specifics */
+.auth-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    outline: none;
+}
+
+.input-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.full-width {
+    width: 100%;
+}
+
+.auth-switch {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    margin-top: 10px;
+}
+
+.auth-switch a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+.error-msg {
+    color: var(--error-color) !important;
+    font-size: 0.9rem !important;
+    min-height: 1.2em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+    .game-board {
+        gap: 10px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .stats-bar {
+        gap: 10px;
+        padding: 10px;
+        width: 100%;
+        border-radius: 20px;
+    }
+}
+
+/* ... Previous styles ... */
+
+.leaderboard-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e7ff;
+    padding: 5px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.3s;
+}
+
+.filter-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.filter-btn.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    font-weight: bold;
+}
+
+/* Ranking Medals */
+#leaderboard-list li {
+    border-left: 4px solid transparent;
+    /* Default border */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Rank 1 - Gold */
+#leaderboard-list li.rank-1 {
+    border-left-color: #ffd700;
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(255, 255, 255, 0.05));
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+#leaderboard-list li.rank-1 span:first-child::before {
+    content: '\\1F451 ';
+}
+
+/* Rank 2 - Silver */
+#leaderboard-list li.rank-2 {
+    border-left-color: #c0c0c0;
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.1), rgba(255, 255, 255, 0.05));
+}
+
+#leaderboard-list li.rank-2 span:first-child::before {
+    content: '\\1F948 ';
+}
+
+/* Rank 3 - Bronze */
+#leaderboard-list li.rank-3 {
+    border-left-color: #cd7f32;
+    background: linear-gradient(90deg, rgba(205, 127, 50, 0.1), rgba(255, 255, 255, 0.05));
+}
+
+#leaderboard-list li.rank-3 span:first-child::before {
+    content: '\\1F949 ';
+}
+/* Current User Highlight */
+#leaderboard-list li.current-user {
+    background: rgba(255, 255, 255, 0.15) !important; /* Slightly brighter */
+    border: 1px solid var(--accent-color); /* Full border */
+    box-shadow: 0 0 15px rgba(110, 68, 255, 0.3); /* Glow */
+}
+
+#leaderboard-list li.current-user span {
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 5px var(--accent-color);
+}
+
+/* Emoji Encoding Fix */
+#leaderboard-list li.rank-1 span:first-child::before { content: '\1F451 ' !important; }
+#leaderboard-list li.rank-2 span:first-child::before { content: '\1F948 ' !important; }
+#leaderboard-list li.rank-3 span:first-child::before { content: '\1F949 ' !important; }
+
+/* Adjust Leaderboard Grid for Points */
+.leaderboard-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    /* ... */
+}
+#leaderboard-list li {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    /* ... */
+}
+
+/* Config Modal */
+#config-modal .input-group input {
+    margin-bottom: 10px;
+}

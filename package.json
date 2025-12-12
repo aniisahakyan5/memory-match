@@ -1,0 +1,14 @@
+{
+  "name": "memory-match",
+  "version": "1.0.0",
+  "description": "A Memory Match game with global leaderboards",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
