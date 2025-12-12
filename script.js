@@ -435,7 +435,17 @@ if (!db.isConfigured()) {
     warning.style.padding = '10px';
     warning.style.borderRadius = '5px';
     warning.style.zIndex = '9999';
-    warning.textContent = '⚠️ Database Not Connected (Check Keys)';
+    warning.innerHTML = '⚠️ Database Not Connected <br><u style="cursor:pointer">Click to Configure</u>';
+    warning.addEventListener('click', () => {
+        const url = prompt("Enter Supabase URL:");
+        if (!url) return;
+        const key = prompt("Enter Supabase Anon Key:");
+        if (!key) return;
+
+        localStorage.setItem('supabase_config', JSON.stringify({ url, key }));
+        alert("Configuration saved! Reloading...");
+        location.reload();
+    });
     document.body.appendChild(warning);
 }
 updateAuthUI();

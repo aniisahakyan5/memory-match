@@ -15,9 +15,11 @@ class CloudDatabase {
         // Read injected config or fall back to defaults
         const config = window.GAME_CONFIG || {};
 
+        const storedConfig = JSON.parse(localStorage.getItem('supabase_config') || '{}');
+
         this.params = {
-            url: config.SUPABASE_URL || DEFAULT_URL,
-            key: config.SUPABASE_KEY || DEFAULT_KEY
+            url: config.SUPABASE_URL || storedConfig.url || DEFAULT_URL,
+            key: config.SUPABASE_KEY || storedConfig.key || DEFAULT_KEY
         };
 
         this.dbReady = false;
