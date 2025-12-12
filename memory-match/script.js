@@ -48,17 +48,30 @@ let isLoginMode = true; // Auth Toggle
 
 // --- Auth UI Logic ---
 
-function updateAuthUI() {
+async function updateAuthUI() {
     if (auth.isLoggedIn()) {
         authModal.classList.remove('visible');
         userProfileBar.classList.remove('hidden');
         gameBoard.classList.remove('blur-locked');
-        usernameDisplay.textContent = auth.getCurrentUser().username;
-        initGame(true); // Start fresh game on login
+
+        const user = auth.getCurrentUser();
+        usernameDisplay.textContent = user.username;
+
+        // Restore Level
+        try {
+            const maxLevel = await db.getUserMaxLevel(user.username);
+            currentLevel = maxLevel + 1;
+        } catch (e) {
+            console.error("Failed to restore level:", e);
+            currentLevel = 1;
+        }
+
+        initGame(false); // Start game at restored level (false = don't reset to 1)
     } else {
         authModal.classList.add('visible');
         userProfileBar.classList.add('hidden');
         gameBoard.classList.add('blur-locked');
+        currentLevel = 1; // Reset on logout
     }
 }
 
