@@ -26,7 +26,6 @@ const logoutBtn = document.getElementById('logout-btn');
 
 // Auth Form Elements
 const authTitle = document.getElementById('auth-title');
-const emailInput = document.getElementById('email-input');
 const usernameInput = document.getElementById('username-input');
 const passwordInput = document.getElementById('password-input');
 const authActionBtn = document.getElementById('auth-action-btn');
@@ -106,15 +105,15 @@ authSwitchLink.addEventListener('click', (e) => {
         authActionBtn.textContent = "Login";
         authSwitchText.textContent = "New here?";
         authSwitchLink.textContent = "Create Account";
-        usernameInput.parentElement.style.display = 'none'; // Hide username in login
-        forgotPasswordLink.parentElement.style.display = 'block'; // Show forgot password
+        // usernameInput.parentElement.style.display = 'none'; // REMOVED: Username is needed for login now
+        forgotPasswordLink.parentElement.style.display = 'none'; // Hide forgot password (no email to reset)
     } else {
         authTitle.textContent = "Create Account";
         authActionBtn.textContent = "Register";
         authSwitchText.textContent = "Already have an account?";
         authSwitchLink.textContent = "Login";
-        usernameInput.parentElement.style.display = 'block'; // Show username in register
-        forgotPasswordLink.parentElement.style.display = 'none'; // Hide forgot password
+        // usernameInput.parentElement.style.display = 'block'; // Always visible
+        forgotPasswordLink.parentElement.style.display = 'none';
     }
     authError.textContent = "";
 });
@@ -167,17 +166,21 @@ resetCancelBtn.addEventListener('click', () => {
 
 
 authActionBtn.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
+    // Synthetic Email Logic for Username-Only Auth
     const username = usernameInput.value.trim();
     const pass = passwordInput.value.trim();
 
+    // Create a synthetic email so Supabase Auth still works
+    // Format: username@memorymatch.game
+    const syntheticEmail = `${username}@memorymatch.game`.toLowerCase();
+
     if (isLoginMode) {
-        if (!email || !pass) {
+        if (!username || !pass) {
             authError.textContent = "Please fill in all fields";
             return;
         }
     } else {
-        if (!email || !username || !pass) {
+        if (!username || !pass) {
             authError.textContent = "Please fill in all fields";
             return;
         }
@@ -185,15 +188,14 @@ authActionBtn.addEventListener('click', async () => {
 
     try {
         if (isLoginMode) {
-            await auth.login(email, pass);
-            emailInput.value = "";
+            await auth.login(syntheticEmail, pass);
             usernameInput.value = "";
             passwordInput.value = "";
             authError.textContent = "";
             await updateAuthUI();
         } else {
-            const result = await auth.register(username, email, pass);
-            emailInput.value = "";
+            // Register with synthetic email
+            const result = await auth.register(username, syntheticEmail, pass);
             usernameInput.value = "";
             passwordInput.value = "";
             authError.textContent = "";
