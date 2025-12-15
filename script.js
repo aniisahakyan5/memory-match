@@ -54,6 +54,7 @@ const otpInstructions = document.getElementById('otp-instructions');
 const otpError = document.getElementById('otp-error');
 const otpSuccess = document.getElementById('otp-success');
 let otpEmail = ''; // Store email for OTP verification
+let otpUsername = ''; // Store username from registration
 
 // Reset Game Confirmation Modal Elements
 const resetModalConfirm = document.getElementById('reset-modal-confirm');
@@ -379,18 +380,21 @@ authActionBtn.addEventListener('click', async () => {
             passwordInput.value = "";
             authError.textContent = "";
 
-            // Show success message if email confirmation is required
+            // Show OTP modal for email verification
             const client = db.getClient();
             if (client) {
                 const { data: sessionData } = await client.auth.getSession();
                 if (!sessionData?.session) {
                     // No session means email verification is required
-                    authError.style.color = '#4ade80'; // Green success color
-                    authError.textContent = '✅ Account created! Check your email to verify your account.';
-                    setTimeout(() => {
-                        authError.textContent = '';
-                        authError.style.color = ''; // Reset color
-                    }, 5000);
+                    // Automatically show OTP modal
+                    otpEmail = email;
+                    otpUsername = username; // Store username from registration
+                    authModal.classList.remove('visible');
+                    otpModal.classList.add('visible');
+                    otpInstructions.textContent = `✅ Account created! Enter the 6-digit code sent to ${email}`;
+                    otpError.textContent = '';
+                    otpSuccess.textContent = '';
+                    otpCodeInput.value = '';
                     return;
                 }
             }
