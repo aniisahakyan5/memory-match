@@ -41,8 +41,6 @@ const resetEmailInput = document.getElementById('reset-email-input');
 const resetActionBtn = document.getElementById('reset-action-btn');
 const resetCancelBtn = document.getElementById('reset-cancel-btn');
 const resetError = document.getElementById('reset-error');
-const resetSuccess = document.getElementById('reset-success');
-
 
 
 // Reset Game Confirmation Modal Elements
@@ -633,3 +631,22 @@ async function updateLeaderboardUI() {
         }
     });
 }
+
+// Initialization logic to ensure UI is correct
+document.addEventListener('DOMContentLoaded', () => {
+    // Force username input to be visible
+    if (usernameInput && usernameInput.parentElement) {
+        usernameInput.parentElement.style.display = 'block';
+    }
+
+    // Ensure auth state is consistent
+    if (typeof isLoginMode !== 'undefined' && isLoginMode) {
+        if (authSwitchLink) {
+            // Simulate switch to set texts if needed, or just set them manually
+            // But simpler to just ensure forgotPass is hidden since we don't support it
+            if (forgotPasswordLink && forgotPasswordLink.parentElement) {
+                forgotPasswordLink.parentElement.style.display = 'none';
+            }
+        }
+    }
+});
