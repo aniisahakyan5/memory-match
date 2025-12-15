@@ -33,25 +33,33 @@ class Auth {
         const client = db.getClient();
         if (!client) throw new Error('Supabase not connected');
 
-        // 1. Sign Up
+        // 1. Sign Up with Supabase Auth
         const { data: authData, error: authError } = await client.auth.signUp({
             email: email,
-            password: password
+            password: password,
+            options: {
+                data: {
+                    username: username // Store username in auth metadata
+                }
+            }
         });
 
         if (authError) throw authError;
 
         if (authData.user) {
-            // 2. Create Profile
-            // We need to store the username linked to this ID
-            // db-cloud.js handle this? Or we do it here directly calling the table.
-
-            // Note: If using Supabase 'public.profiles' table with Row Level Security, 
-            // the INSERT must usually happen here or via a Trigger.
-            // We'll try client-side insert first.
             const user = authData.user;
 
-            await db.createProfile(user.id, username, email);
+            // 2. Wait a moment for auth to fully commit
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // 3. Create Profile
+            try {
+                await db.createProfile(user.id, username, email);
+            } catch (profileError) {
+                console.error('Profile creation error:', profileError);
+                // If profile creation fails, still return success
+                // User can login and we'll create profile on first login
+            }
 
             return user;
         }
