@@ -207,15 +207,19 @@ otpVerifyBtn.addEventListener('click', async () => {
         return;
     }
 
+    // Determine verification type: 'signup' if we have a username (registration), 'email' otherwise (login)
+    const type = otpUsername ? 'signup' : 'email';
+    console.log('Verifying OTP with type:', type); // Debug log
+
     try {
-        const { session, user } = await auth.verifyOTP(otpEmail, code);
+        const { session, user } = await auth.verifyOTP(otpEmail, code, type);
 
         // If new user, create profile
         if (user) {
             const existingProfile = await db.findUserById(user.id);
             if (!existingProfile) {
-                // Need username for new OTP users
-                const username = prompt('Welcome! Please enter a username for the leaderboard:');
+                // Use stored username from registration, or prompt if passwordless login
+                const username = otpUsername || prompt('Welcome! Please enter a username for the leaderboard:');
                 if (username) {
                     try {
                         await db.createProfile(user.id, username, user.email);
@@ -229,93 +233,7 @@ otpVerifyBtn.addEventListener('click', async () => {
         otpModal.classList.remove('visible');
         otpCodeInput.value = '';
         otpEmail = '';
-        await updateAuthUI();
-    } catch (err) {
-        otpError.textContent = err.message || 'Invalid code. Please try again.';
-    }
-});
-
-// OTP Resend
-otpResendBtn.addEventListener('click', async () => {
-    if (!otpEmail) return;
-
-    try {
-        await auth.signInWithOTP(otpEmail);
-        otpSuccess.textContent = 'New code sent! Check your email.';
-        otpError.textContent = '';
-        setTimeout(() => {
-            otpSuccess.textContent = '';
-        }, 3000);
-    } catch (err) {
-        otpError.textContent = err.message || 'Failed to resend code';
-    }
-});
-
-// OTP Cancel
-otpCancelBtn.addEventListener('click', () => {
-    otpModal.classList.remove('visible');
-    authModal.classList.add('visible');
-    otpCodeInput.value = '';
-    otpError.textContent = '';
-    otpSuccess.textContent = '';
-    otpEmail = '';
-});
-
-// OTP Link - Send Magic Link
-otpLink.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const email = emailInput.value.trim();
-
-    if (!email) {
-        authError.textContent = 'Please enter your email address';
-        return;
-    }
-
-    try {
-        await auth.signInWithOTP(email);
-        otpEmail = email;
-        authModal.classList.remove('visible');
-        otpModal.classList.add('visible');
-        otpInstructions.textContent = `Enter the 6-digit code sent to ${email}`;
-        otpError.textContent = '';
-        otpSuccess.textContent = '';
-        otpCodeInput.value = '';
-    } catch (err) {
-        authError.textContent = err.message || 'Failed to send code';
-    }
-});
-
-// OTP Verify
-otpVerifyBtn.addEventListener('click', async () => {
-    const code = otpCodeInput.value.trim();
-
-    if (!code || code.length !== 6) {
-        otpError.textContent = 'Please enter a valid 6-digit code';
-        return;
-    }
-
-    try {
-        const { session, user } = await auth.verifyOTP(otpEmail, code);
-
-        // If new user, create profile
-        if (user) {
-            const existingProfile = await db.findUserById(user.id);
-            if (!existingProfile) {
-                // Need username for new OTP users
-                const username = prompt('Welcome! Please enter a username for the leaderboard:');
-                if (username) {
-                    try {
-                        await db.createProfile(user.id, username, user.email);
-                    } catch (e) {
-                        console.error('Profile creation error:', e);
-                    }
-                }
-            }
-        }
-
-        otpModal.classList.remove('visible');
-        otpCodeInput.value = '';
-        otpEmail = '';
+        otpUsername = ''; // Clear stored username
         await updateAuthUI();
     } catch (err) {
         otpError.textContent = err.message || 'Invalid code. Please try again.';

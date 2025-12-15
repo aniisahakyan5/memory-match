@@ -84,14 +84,14 @@ class Auth {
         return data;
     }
 
-    async verifyOTP(email, token) {
+    async verifyOTP(email, token, type = 'email') {
         const client = db.getClient();
         if (!client) throw new Error('Supabase not connected');
 
         const { data, error } = await client.auth.verifyOtp({
             email: email,
             token: token,
-            type: 'email'
+            type: type
         });
 
         if (error) throw error;
