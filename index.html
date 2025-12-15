@@ -90,6 +90,42 @@
             <p class="auth-switch forgot-password-container">
                 <a href="#" id="forgot-password-link">Forgot Password?</a>
             </p>
+            <p class="auth-switch">
+                <a href="#" id="otp-link">📧 Login with Email Code (Passwordless)</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- OTP Verification Modal -->
+    <div id="otp-modal" class="modal hidden">
+        <div class="modal-content auth-content">
+            <h2>Email Code Verification</h2>
+            <p id="otp-instructions">Enter the 6-digit code sent to your email</p>
+            <div class="input-group">
+                <input type="text" id="otp-code-input" placeholder="6-digit code" maxlength="6" inputmode="numeric">
+            </div>
+            <p id="otp-error" class="error-msg"></p>
+            <p id="otp-success" class="success-msg"></p>
+            <button id="otp-verify-btn" class="btn primary full-width">Verify Code</button>
+            <button id="otp-resend-btn" class="btn full-width" style="margin-top: 10px;">Resend Code</button>
+            <button id="otp-cancel-btn" class="btn full-width" style="margin-top: 10px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- OTP Verification Modal -->
+    <div id="otp-modal" class="modal hidden">
+        <div class="modal-content auth-content">
+            <h2>📧 Email Code Verification</h2>
+            <p id="otp-instructions">Enter the 6-digit code sent to your email</p>
+            <div class="input-group">
+                <input type="text" id="otp-code-input" placeholder="Enter 6-digit code" maxlength="6"
+                    inputmode="numeric">
+            </div>
+            <p id="otp-error" class="error-msg"></p>
+            <p id="otp-success" class="success-msg"></p>
+            <button id="otp-verify-btn" class="btn primary full-width">Verify Code</button>
+            <button id="otp-resend-btn" class="btn full-width" style="margin-top: 10px;">Resend Code</button>
+            <button id="otp-cancel-btn" class="btn full-width" style="margin-top: 10px;">Cancel</button>
         </div>
     </div>
 

@@ -34,6 +34,7 @@ const authSwitchText = document.getElementById('auth-switch-text');
 const authSwitchLink = document.getElementById('auth-switch-link');
 const authError = document.getElementById('auth-error');
 const forgotPasswordLink = document.getElementById('forgot-password-link');
+const otpLink = document.getElementById('otp-link');
 
 // Reset Password Modal Elements
 const resetModal = document.getElementById('reset-modal');
@@ -42,6 +43,17 @@ const resetActionBtn = document.getElementById('reset-action-btn');
 const resetCancelBtn = document.getElementById('reset-cancel-btn');
 const resetError = document.getElementById('reset-error');
 const resetSuccess = document.getElementById('reset-success');
+
+// OTP Modal Elements
+const otpModal = document.getElementById('otp-modal');
+const otpCodeInput = document.getElementById('otp-code-input');
+const otpVerifyBtn = document.getElementById('otp-verify-btn');
+const otpResendBtn = document.getElementById('otp-resend-btn');
+const otpCancelBtn = document.getElementById('otp-cancel-btn');
+const otpInstructions = document.getElementById('otp-instructions');
+const otpError = document.getElementById('otp-error');
+const otpSuccess = document.getElementById('otp-success');
+let otpEmail = ''; // Store email for OTP verification
 
 // Reset Game Confirmation Modal Elements
 const resetModalConfirm = document.getElementById('reset-modal-confirm');
@@ -161,6 +173,180 @@ resetCancelBtn.addEventListener('click', () => {
     resetSuccess.textContent = '';
 });
 
+// OTP Link - Send Magic Link
+otpLink.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+
+    if (!email) {
+        authError.textContent = 'Please enter your email address';
+        return;
+    }
+
+    try {
+        await auth.signInWithOTP(email);
+        otpEmail = email;
+        authModal.classList.remove('visible');
+        otpModal.classList.add('visible');
+        otpInstructions.textContent = `Enter the 6-digit code sent to ${email}`;
+        otpError.textContent = '';
+        otpSuccess.textContent = '';
+        otpCodeInput.value = '';
+    } catch (err) {
+        authError.textContent = err.message || 'Failed to send code';
+    }
+});
+
+// OTP Verify
+otpVerifyBtn.addEventListener('click', async () => {
+    const code = otpCodeInput.value.trim();
+
+    if (!code || code.length !== 6) {
+        otpError.textContent = 'Please enter a valid 6-digit code';
+        return;
+    }
+
+    try {
+        const { session, user } = await auth.verifyOTP(otpEmail, code);
+
+        // If new user, create profile
+        if (user) {
+            const existingProfile = await db.findUserById(user.id);
+            if (!existingProfile) {
+                // Need username for new OTP users
+                const username = prompt('Welcome! Please enter a username for the leaderboard:');
+                if (username) {
+                    try {
+                        await db.createProfile(user.id, username, user.email);
+                    } catch (e) {
+                        console.error('Profile creation error:', e);
+                    }
+                }
+            }
+        }
+
+        otpModal.classList.remove('visible');
+        otpCodeInput.value = '';
+        otpEmail = '';
+        await updateAuthUI();
+    } catch (err) {
+        otpError.textContent = err.message || 'Invalid code. Please try again.';
+    }
+});
+
+// OTP Resend
+otpResendBtn.addEventListener('click', async () => {
+    if (!otpEmail) return;
+
+    try {
+        await auth.signInWithOTP(otpEmail);
+        otpSuccess.textContent = 'New code sent! Check your email.';
+        otpError.textContent = '';
+        setTimeout(() => {
+            otpSuccess.textContent = '';
+        }, 3000);
+    } catch (err) {
+        otpError.textContent = err.message || 'Failed to resend code';
+    }
+});
+
+// OTP Cancel
+otpCancelBtn.addEventListener('click', () => {
+    otpModal.classList.remove('visible');
+    authModal.classList.add('visible');
+    otpCodeInput.value = '';
+    otpError.textContent = '';
+    otpSuccess.textContent = '';
+    otpEmail = '';
+});
+
+// OTP Link - Send Magic Link
+otpLink.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+
+    if (!email) {
+        authError.textContent = 'Please enter your email address';
+        return;
+    }
+
+    try {
+        await auth.signInWithOTP(email);
+        otpEmail = email;
+        authModal.classList.remove('visible');
+        otpModal.classList.add('visible');
+        otpInstructions.textContent = `Enter the 6-digit code sent to ${email}`;
+        otpError.textContent = '';
+        otpSuccess.textContent = '';
+        otpCodeInput.value = '';
+    } catch (err) {
+        authError.textContent = err.message || 'Failed to send code';
+    }
+});
+
+// OTP Verify
+otpVerifyBtn.addEventListener('click', async () => {
+    const code = otpCodeInput.value.trim();
+
+    if (!code || code.length !== 6) {
+        otpError.textContent = 'Please enter a valid 6-digit code';
+        return;
+    }
+
+    try {
+        const { session, user } = await auth.verifyOTP(otpEmail, code);
+
+        // If new user, create profile
+        if (user) {
+            const existingProfile = await db.findUserById(user.id);
+            if (!existingProfile) {
+                // Need username for new OTP users
+                const username = prompt('Welcome! Please enter a username for the leaderboard:');
+                if (username) {
+                    try {
+                        await db.createProfile(user.id, username, user.email);
+                    } catch (e) {
+                        console.error('Profile creation error:', e);
+                    }
+                }
+            }
+        }
+
+        otpModal.classList.remove('visible');
+        otpCodeInput.value = '';
+        otpEmail = '';
+        await updateAuthUI();
+    } catch (err) {
+        otpError.textContent = err.message || 'Invalid code. Please try again.';
+    }
+});
+
+// OTP Resend
+otpResendBtn.addEventListener('click', async () => {
+    if (!otpEmail) return;
+
+    try {
+        await auth.signInWithOTP(otpEmail);
+        otpSuccess.textContent = 'New code sent! Check your email.';
+        otpError.textContent = '';
+        setTimeout(() => {
+            otpSuccess.textContent = '';
+        }, 3000);
+    } catch (err) {
+        otpError.textContent = err.message || 'Failed to resend code';
+    }
+});
+
+// OTP Cancel
+otpCancelBtn.addEventListener('click', () => {
+    otpModal.classList.remove('visible');
+    authModal.classList.add('visible');
+    otpCodeInput.value = '';
+    otpError.textContent = '';
+    otpSuccess.textContent = '';
+    otpEmail = '';
+});
+
 authActionBtn.addEventListener('click', async () => {
     const email = emailInput.value.trim();
     const username = usernameInput.value.trim();
@@ -181,15 +367,38 @@ authActionBtn.addEventListener('click', async () => {
     try {
         if (isLoginMode) {
             await auth.login(email, pass);
+            emailInput.value = "";
+            usernameInput.value = "";
+            passwordInput.value = "";
+            authError.textContent = "";
+            await updateAuthUI();
         } else {
-            await auth.register(username, email, pass);
+            const result = await auth.register(username, email, pass);
+            emailInput.value = "";
+            usernameInput.value = "";
+            passwordInput.value = "";
+            authError.textContent = "";
+
+            // Show success message if email confirmation is required
+            const client = db.getClient();
+            if (client) {
+                const { data: sessionData } = await client.auth.getSession();
+                if (!sessionData?.session) {
+                    // No session means email verification is required
+                    authError.style.color = '#4ade80'; // Green success color
+                    authError.textContent = '✅ Account created! Check your email to verify your account.';
+                    setTimeout(() => {
+                        authError.textContent = '';
+                        authError.style.color = ''; // Reset color
+                    }, 5000);
+                    return;
+                }
+            }
+
+            await updateAuthUI();
         }
-        emailInput.value = "";
-        usernameInput.value = "";
-        passwordInput.value = "";
-        authError.textContent = "";
-        await updateAuthUI();
     } catch (err) {
+        authError.style.color = ''; // Reset to error color
         authError.textContent = err.message || 'Authentication failed';
     }
 });
