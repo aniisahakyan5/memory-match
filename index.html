@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_append.css">
     <link rel="manifest" href="manifest.json">
     <!-- ENV_INJECTION -->
     <!-- Config handled via Server Environment Variables -->
@@ -72,7 +73,10 @@
         <div class="modal-content auth-content">
             <h2 id="auth-title">Welcome Back</h2>
             <div class="input-group">
-                <input type="text" id="username-input" placeholder="Username">
+                <input type="email" id="email-input" placeholder="Email Address">
+            </div>
+            <div class="input-group">
+                <input type="text" id="username-input" placeholder="Username (for leaderboard)">
             </div>
             <div class="input-group">
                 <input type="password" id="password-input" placeholder="Password">
@@ -83,6 +87,39 @@
                 <span id="auth-switch-text">New here?</span>
                 <a href="#" id="auth-switch-link">Create Account</a>
             </p>
+            <p class="auth-switch forgot-password-container">
+                <a href="#" id="forgot-password-link">Forgot Password?</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="reset-modal" class="modal hidden">
+        <div class="modal-content auth-content">
+            <h2>Reset Password</h2>
+            <p>Enter your email to receive a reset link.</p>
+            <div class="input-group">
+                <input type="email" id="reset-email-input" placeholder="Email Address">
+            </div>
+            <p id="reset-error" class="error-msg"></p>
+            <p id="reset-success" class="success-msg"></p>
+            <button id="reset-action-btn" class="btn primary full-width">Send Reset Link</button>
+            <button id="reset-cancel-btn" class="btn full-width" style="margin-top: 10px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="reset-modal-confirm" class="modal hidden">
+        <div class="modal-content">
+            <h2>🔄 Reset Game</h2>
+            <p>Choose what you want to reset:</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <button id="reset-full-game-btn" class="btn primary full-width">Reset Full Game (Start from Level
+                    1)</button>
+                <button id="reset-current-level-btn" class="btn full-width">Restart Current Level Only</button>
+                <button id="reset-cancel-btn-game" class="btn full-width"
+                    style="background: rgba(255,255,255,0.1);">Cancel</button>
+            </div>
         </div>
     </div>
 

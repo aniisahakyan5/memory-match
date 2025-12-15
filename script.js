@@ -26,12 +26,28 @@ const logoutBtn = document.getElementById('logout-btn');
 
 // Auth Form Elements
 const authTitle = document.getElementById('auth-title');
+const emailInput = document.getElementById('email-input');
 const usernameInput = document.getElementById('username-input');
 const passwordInput = document.getElementById('password-input');
 const authActionBtn = document.getElementById('auth-action-btn');
 const authSwitchText = document.getElementById('auth-switch-text');
 const authSwitchLink = document.getElementById('auth-switch-link');
 const authError = document.getElementById('auth-error');
+const forgotPasswordLink = document.getElementById('forgot-password-link');
+
+// Reset Password Modal Elements
+const resetModal = document.getElementById('reset-modal');
+const resetEmailInput = document.getElementById('reset-email-input');
+const resetActionBtn = document.getElementById('reset-action-btn');
+const resetCancelBtn = document.getElementById('reset-cancel-btn');
+const resetError = document.getElementById('reset-error');
+const resetSuccess = document.getElementById('reset-success');
+
+// Reset Game Confirmation Modal Elements
+const resetModalConfirm = document.getElementById('reset-modal-confirm');
+const resetFullGameBtn = document.getElementById('reset-full-game-btn');
+const resetCurrentLevelBtn = document.getElementById('reset-current-level-btn');
+const resetCancelBtnGame = document.getElementById('reset-cancel-btn-game');
 
 const BASE_ICONS = ['🚀', '🌟', '🎮', '💎', '👻', '🍕', '🐱', '🦄', '🌈', '🍦', '🎈', '🎁', '🏆', '🔥', '⚡', '💣', '🍎', '🌻'];
 let cards = [];
@@ -51,22 +67,26 @@ let isLoginMode = true; // Auth Toggle
 async function updateAuthUI() {
     if (auth.isLoggedIn()) {
         authModal.classList.remove('visible');
+        resetModal.classList.remove('visible');
         userProfileBar.classList.remove('hidden');
         gameBoard.classList.remove('blur-locked');
 
-        const user = auth.getCurrentUser();
-        usernameDisplay.textContent = user.username;
+        const userFull = await auth.getCurrentUserFull();
+        if (userFull && userFull.username) {
+            usernameDisplay.textContent = userFull.username;
 
-        // Restore Level
-        try {
-            const maxLevel = await db.getUserMaxLevel(user.username);
-            currentLevel = maxLevel + 1;
-        } catch (e) {
-            console.error("Failed to restore level:", e);
-            currentLevel = 1;
+            // Restore Level BEFORE initializing game
+            try {
+                const maxLevel = await db.getUserMaxLevel(userFull.username);
+                currentLevel = maxLevel + 1;
+            } catch (e) {
+                console.error("Failed to restore level:", e);
+                currentLevel = 1;
+            }
+
+            // Now initialize game with the correct level (no flash!)
+            initGame(false); // Start game at restored level (false = don't reset to 1)
         }
-
-        initGame(false); // Start game at restored level (false = don't reset to 1)
     } else {
         authModal.classList.add('visible');
         userProfileBar.classList.add('hidden');
@@ -83,41 +103,104 @@ authSwitchLink.addEventListener('click', (e) => {
         authActionBtn.textContent = "Login";
         authSwitchText.textContent = "New here?";
         authSwitchLink.textContent = "Create Account";
+        usernameInput.parentElement.style.display = 'none'; // Hide username in login
+        forgotPasswordLink.parentElement.style.display = 'block'; // Show forgot password
     } else {
         authTitle.textContent = "Create Account";
         authActionBtn.textContent = "Register";
         authSwitchText.textContent = "Already have an account?";
         authSwitchLink.textContent = "Login";
+        usernameInput.parentElement.style.display = 'block'; // Show username in register
+        forgotPasswordLink.parentElement.style.display = 'none'; // Hide forgot password
     }
     authError.textContent = "";
 });
 
-authActionBtn.addEventListener('click', async () => {
-    const user = usernameInput.value.trim();
-    const pass = passwordInput.value.trim();
+// Forgot Password Link
+forgotPasswordLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    authModal.classList.remove('visible');
+    resetModal.classList.add('visible');
+    resetError.textContent = '';
+    resetSuccess.textContent = '';
+    resetEmailInput.value = '';
+});
 
-    if (!user || !pass) {
-        authError.textContent = "Please fill in all fields";
+// Reset Password Action
+resetActionBtn.addEventListener('click', async () => {
+    const email = resetEmailInput.value.trim();
+
+    if (!email) {
+        resetError.textContent = 'Please enter your email';
         return;
     }
 
     try {
-        if (isLoginMode) {
-            await auth.login(user, pass);
-        } else {
-            await auth.register(user, pass);
-        }
-        usernameInput.value = "";
-        passwordInput.value = "";
-        authError.textContent = "";
-        updateAuthUI();
+        await auth.resetPassword(email);
+        resetSuccess.textContent = 'Reset link sent! Check your email.';
+        resetError.textContent = '';
+        resetEmailInput.value = '';
+
+        // Return to login after 3 seconds
+        setTimeout(() => {
+            resetModal.classList.remove('visible');
+            authModal.classList.add('visible');
+            resetSuccess.textContent = '';
+        }, 3000);
     } catch (err) {
-        authError.textContent = err.message;
+        resetError.textContent = err.message || 'Failed to send reset link';
+        resetSuccess.textContent = '';
     }
 });
 
-logoutBtn.addEventListener('click', () => {
-    auth.logout();
+// Reset Cancel
+resetCancelBtn.addEventListener('click', () => {
+    resetModal.classList.remove('visible');
+    authModal.classList.add('visible');
+    resetError.textContent = '';
+    resetSuccess.textContent = '';
+});
+
+authActionBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    const username = usernameInput.value.trim();
+    const pass = passwordInput.value.trim();
+
+    if (isLoginMode) {
+        if (!email || !pass) {
+            authError.textContent = "Please fill in all fields";
+            return;
+        }
+    } else {
+        if (!email || !username || !pass) {
+            authError.textContent = "Please fill in all fields";
+            return;
+        }
+    }
+
+    try {
+        if (isLoginMode) {
+            await auth.login(email, pass);
+        } else {
+            await auth.register(username, email, pass);
+        }
+        emailInput.value = "";
+        usernameInput.value = "";
+        passwordInput.value = "";
+        authError.textContent = "";
+        await updateAuthUI();
+    } catch (err) {
+        authError.textContent = err.message || 'Authentication failed';
+    }
+});
+
+logoutBtn.addEventListener('click', async () => {
+    await auth.logout();
+    updateAuthUI();
+});
+
+// Listen for auth state changes
+window.addEventListener('auth-changed', () => {
     updateAuthUI();
 });
 
@@ -330,18 +413,20 @@ async function handleWin() {
 
     // Save Score
     if (auth.isLoggedIn()) {
-        const user = auth.getCurrentUser();
-        await db.saveScore({
-            username: user.username, // We store username to avoid joins for now
-            level: currentLevel,
-            moves: moves,
-            timeStr: timeStr,
-            timeSeconds: timeSeconds,
-            date: new Date().toLocaleDateString()
-        });
+        const userFull = await auth.getCurrentUserFull();
+        if (userFull && userFull.username) {
+            await db.saveScore({
+                username: userFull.username, // We store username to avoid joins for now
+                level: currentLevel,
+                moves: moves,
+                timeStr: timeStr,
+                timeSeconds: timeSeconds,
+                date: new Date().toLocaleDateString()
+            });
 
-        // Update Leaderboard immediately
-        updateLeaderboardUI();
+            // Update Leaderboard immediately
+            updateLeaderboardUI();
+        }
     }
 
     // Show Modal
@@ -417,7 +502,26 @@ function updateLeaderboardUI() {
 }
 
 // Event Listeners
-restartBtn.addEventListener('click', () => initGame(true));
+restartBtn.addEventListener('click', () => {
+    // Show reset confirmation modal instead of directly resetting
+    resetModalConfirm.classList.add('visible');
+});
+
+// Reset confirmation modal handlers
+resetFullGameBtn.addEventListener('click', () => {
+    resetModalConfirm.classList.remove('visible');
+    initGame(true); // Reset to Level 1
+});
+
+resetCurrentLevelBtn.addEventListener('click', () => {
+    resetModalConfirm.classList.remove('visible');
+    initGame(false); // Restart current level
+});
+
+resetCancelBtnGame.addEventListener('click', () => {
+    resetModalConfirm.classList.remove('visible');
+});
+
 nextLevelBtn.addEventListener('click', nextLevel);
 retryLevelBtn.addEventListener('click', retryLevel);
 
@@ -448,7 +552,30 @@ if (!db.isConfigured()) {
     });
     document.body.appendChild(warning);
 }
-updateAuthUI();
+
+// Initialize UI state
+if (usernameInput && usernameInput.parentElement) {
+    usernameInput.parentElement.style.display = 'none'; // Start in login mode
+}
+if (forgotPasswordLink && forgotPasswordLink.parentElement) {
+    forgotPasswordLink.parentElement.style.display = 'block'; // Show forgot password in login
+}
+
+// Wait for auth to check session before updating UI
+// This prevents the Level 1 flash by ensuring we only render ONCE with the correct level
+(async function initializeApp() {
+    const client = db.getClient();
+    if (client) {
+        // Check if user has an active session
+        const { data: sessionData } = await client.auth.getSession();
+        if (sessionData?.session) {
+            auth.currentUser = sessionData.session.user;
+        }
+    }
+
+    // Now update UI with the correct auth state
+    await updateAuthUI();
+})();
 
 async function updateLeaderboardUI() {
     // Get Consolidated Scores (One per user, best performance)
@@ -463,6 +590,14 @@ async function updateLeaderboardUI() {
     }
 
     // Top 10 Global
+    const currentUser = auth.currentUser;
+    let currentUsername = null;
+
+    if (currentUser) {
+        const userFull = await auth.getCurrentUserFull();
+        if (userFull) currentUsername = userFull.username;
+    }
+
     rankings.slice(0, 10).forEach((score, index) => {
         const li = document.createElement('li');
 
@@ -479,7 +614,7 @@ async function updateLeaderboardUI() {
         leaderboardList.appendChild(li);
 
         // Highlight current user
-        if (auth.getCurrentUser() && score.username === auth.getCurrentUser().username) {
+        if (currentUsername && score.username === currentUsername) {
             li.classList.add('current-user');
         }
     });

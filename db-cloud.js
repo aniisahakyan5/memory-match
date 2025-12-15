@@ -49,7 +49,28 @@ class CloudDatabase {
     // Config saving is no longer needed on client
     // saveConfig(url, key) { ... } REMOVED
 
+
+    getClient() {
+        return supabaseClient;
+    }
+
     // --- Users ---
+
+    async findUserById(uuid) {
+        if (!this.dbReady) return null;
+
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', uuid)
+            .single();
+
+        if (error) {
+            // console.error('Find User By ID Error:', error);
+            return null;
+        }
+        return data;
+    }
 
     async findUser(username) {
         if (!this.dbReady) {
@@ -69,16 +90,16 @@ class CloudDatabase {
         return data;
     }
 
-    async saveUser(user) {
+    async createProfile(id, username, email) {
         if (!this.dbReady) throw new Error('Database not connected. Check your internet or Game Settings.');
 
         const { error } = await supabaseClient
             .from('profiles')
             .insert([{
-                id: user.id,
-                username: user.username,
-                password_hash: user.passwordHash,
+                id: id,
+                username: username,
                 created_at: new Date()
+                // Email is stored in Auth, not strictly needed in public profile unless desired
             }]);
 
         if (error) throw error;
