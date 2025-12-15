@@ -66,39 +66,6 @@ class Auth {
         }
     }
 
-    async signInWithOTP(email) {
-        const client = db.getClient();
-        if (!client) throw new Error('Supabase not connected');
-
-        const { data, error } = await client.auth.signInWithOtp({
-            email: email,
-            options: {
-                shouldCreateUser: true,
-                data: {
-                    // Username will be set during OTP verification
-                }
-            }
-        });
-
-        if (error) throw error;
-        return data;
-    }
-
-    async verifyOTP(email, token, type = 'email') {
-        const client = db.getClient();
-        if (!client) throw new Error('Supabase not connected');
-
-        const { data, error } = await client.auth.verifyOtp({
-            email: email,
-            token: token,
-            type: type
-        });
-
-        if (error) throw error;
-
-        this.currentUser = data.user;
-        return data;
-    }
 
     async login(email, password) {
         const client = db.getClient();
